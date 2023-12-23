@@ -1203,12 +1203,7 @@ class AttnProcessor2_0:
     def __init__(self):
         if not hasattr(F, "scaled_dot_product_attention"):
             raise ImportError("AttnProcessor2_0 requires PyTorch 2.0, to use it, please upgrade PyTorch to 2.0.")
-<<<<<<< HEAD
-        self.cross_attn_map=None
-
-=======
         self.cross_attn_map = None
->>>>>>> 64cc7bae8c6f0745643338ac9423009eb89e8ab6
     def __call__(
         self,
         attn: Attention,
@@ -1217,11 +1212,8 @@ class AttnProcessor2_0:
         attention_mask: Optional[torch.FloatTensor] = None,
         temb: Optional[torch.FloatTensor] = None,
         scale: float = 1.0,
-<<<<<<< HEAD
         store_cross_attn_map=False
-=======
-        store_cross_attn_map = None
->>>>>>> 64cc7bae8c6f0745643338ac9423009eb89e8ab6
+
     ) -> torch.FloatTensor:
         residual = hidden_states
         if attn.spatial_norm is not None:
