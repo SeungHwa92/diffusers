@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from importlib import import_module
+import queue
 from typing import Callable, Optional, Union
 
 import torch
@@ -1202,8 +1203,12 @@ class AttnProcessor2_0:
     def __init__(self):
         if not hasattr(F, "scaled_dot_product_attention"):
             raise ImportError("AttnProcessor2_0 requires PyTorch 2.0, to use it, please upgrade PyTorch to 2.0.")
+<<<<<<< HEAD
         self.cross_attn_map=None
 
+=======
+        self.cross_attn_map = None
+>>>>>>> 64cc7bae8c6f0745643338ac9423009eb89e8ab6
     def __call__(
         self,
         attn: Attention,
@@ -1212,7 +1217,11 @@ class AttnProcessor2_0:
         attention_mask: Optional[torch.FloatTensor] = None,
         temb: Optional[torch.FloatTensor] = None,
         scale: float = 1.0,
+<<<<<<< HEAD
         store_cross_attn_map=False
+=======
+        store_cross_attn_map = None
+>>>>>>> 64cc7bae8c6f0745643338ac9423009eb89e8ab6
     ) -> torch.FloatTensor:
         residual = hidden_states
         if attn.spatial_norm is not None:
@@ -1242,11 +1251,22 @@ class AttnProcessor2_0:
 
         if encoder_hidden_states is None:
             encoder_hidden_states = hidden_states
+            store_cross_attn_map = False
         elif attn.norm_cross:
             encoder_hidden_states = attn.norm_encoder_hidden_states(encoder_hidden_states)
         
         key = attn.to_k(encoder_hidden_states, *args)
         value = attn.to_v(encoder_hidden_states, *args)
+
+        if store_cross_attn_map:
+            hw, c = query.shape[-2:]
+            l, c = key.shape[-2:]
+            tmp_q = query.reshape(-1, hw, c)
+            tmp_k = key.reshape(-1, l, c).permute(0, 2, 1)
+            attn_map = torch.bmm(tmp_q, tmp_k)
+            self.cross_attn_map = attn_map
+        else:
+            self.cross_attn_map = None
 
         inner_dim = key.shape[-1]
         head_dim = inner_dim // attn.heads

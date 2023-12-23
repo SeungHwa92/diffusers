@@ -224,7 +224,7 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
         super().__init__()
 
         self.sample_size = sample_size
-
+        self.store_cross_attn_map = False
         if num_attention_heads is not None:
             raise ValueError(
                 "At the moment it is not possible to define the number of attention heads via `num_attention_heads` because of a naming issue as described in https://github.com/huggingface/diffusers/issues/2011#issuecomment-1547958131. Passing `num_attention_heads` will only be supported in diffusers v0.19."
@@ -1100,6 +1100,12 @@ class UNet2DConditionModel(ModelMixin, ConfigMixin, UNet2DConditionLoadersMixin)
             )
             down_intrablock_additional_residuals = down_block_additional_residuals
             is_adapter = True
+
+        if self.store_cross_attn_map:
+            if cross_attention_kwargs is None:
+                cross_attention_kwargs = {'store_cross_attn_map' : True}
+            else:
+                cross_attention_kwargs['store_cross_attn_map'] = True
 
         down_block_res_samples = (sample,)
         for downsample_block in self.down_blocks:
